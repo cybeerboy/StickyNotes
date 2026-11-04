@@ -484,7 +484,7 @@ LRESULT CALLBACK aboutDialogProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
         };
         state->titleFont=CreateFontW(-22,0,0,0,FW_SEMIBOLD,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,CLEARTYPE_QUALITY,DEFAULT_PITCH,L"Segoe UI");
         HWND title=add(L"STATIC",L"StickyNotes",0,92,29,265,30,0); if(state->titleFont) SendMessageW(title,WM_SETFONT,reinterpret_cast<WPARAM>(state->titleFont),TRUE);
-        add(L"STATIC",L"Version 1.0.1 · Haftnotizen für Windows",0,92,59,265,23,601);
+        add(L"STATIC",L"Version 1.0.2 · Haftnotizen für Windows",0,92,59,265,23,601);
         add(L"STATIC",L"Gedanken festhalten.\nEinfach, persönlich und portabel.",0,28,113,330,48,602);
         add(L"STATIC",L"© CyBeerBoy",0,28,177,330,24,603);
         add(L"BUTTON",L"GitHub-Profil öffnen  ↗",WS_TABSTOP|BS_OWNERDRAW,28,215,330,39,502);
@@ -754,12 +754,9 @@ int WINAPI wWinMain(HINSTANCE h, HINSTANCE, PWSTR, int) {
     if (!LoadLibraryW(L"Msftedit.dll")) { warn(L"Das Windows-Textsteuerelement konnte nicht geladen werden."); return 1; }
     SetProcessDPIAware();
     wchar_t folder[32768]{};
-    DWORD length=GetEnvironmentVariableW(L"STICKYNOTES_PORTABLE_DIR",folder,32768);
-    if (!length || length>=32768) {
-        length=GetModuleFileNameW(nullptr,folder,32768);
-        if (!length || length>=32768) { warn(L"Der Programmordner konnte nicht gefunden werden."); return 1; }
-        dataPath=std::filesystem::path(folder).parent_path()/L"notes.dat";
-    } else dataPath=std::filesystem::path(folder)/L"notes.dat";
+    DWORD length=GetModuleFileNameW(nullptr,folder,32768);
+    if (!length || length>=32768) { warn(L"Der Programmordner konnte nicht gefunden werden."); return 1; }
+    dataPath=std::filesystem::path(folder).parent_path()/L"notes.dat";
     std::error_code existsError;
     bool portableExists=std::filesystem::exists(dataPath,existsError);
     if (existsError) { warn(L"Auf den Programmordner kann nicht zugegriffen werden."); return 1; }

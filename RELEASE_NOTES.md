@@ -1,4 +1,13 @@
-# StickyNotes 1.0.1
+# StickyNotes 1.0.2
+
+Diese Version startet direkt als einzelne portable EXE. Der bisherige Starter,
+der das Programm in einen temporären Ordner entpackte, wurde entfernt.
+Hintergrund ist eine Defender-Meldung für Version 1.0.1. Die neue Datei wurde
+mit Microsoft Defender auf dem Entwicklungsrechner geprüft; dabei wurde keine
+Bedrohung gefunden. Ein Scan ist keine allgemeine Sicherheitsgarantie.
+Notizen und Anlagen in `notes.dat` bleiben mit der neuen Version nutzbar.
+
+## StickyNotes 1.0.1
 
 StickyNotes hat jetzt ein eigenes Icon: ein kleiner gelber Notizzettel, der
 auch im Explorer und in der Taskleiste zu erkennen ist. Die portable EXE

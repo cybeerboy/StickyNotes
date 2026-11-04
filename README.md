@@ -45,7 +45,7 @@ Eine portable Windows-Anwendung für Haftnotizen auf dem Desktop. Jede Notiz ist
 
 Falls neben der EXE noch keine `notes.dat` liegt, übernimmt die Anwendung beim ersten Start eine vorhandene Datei aus `%LOCALAPPDATA%\StickyNotes\notes.dat`. Die alte Datei bleibt dabei erhalten. Bei fehlenden Schreibrechten wird die Übernahme abgebrochen. Kann eine vorhandene Datendatei nicht gelesen werden, meldet die Anwendung den Fehler und beendet sich, ohne die Datei zu überschreiben.
 
-Beim Start entpackt die portable EXE die interne Anwendung und ihre Laufzeit vorübergehend in einen Windows-Tempordner; nach normalem Beenden werden diese Programmdateien entfernt. Die Notizen selbst bleiben neben der EXE. Beim Öffnen einer Anlage entsteht eine Kopie im Windows-Tempordner. Diese Kopie kann nach dem Schließen erhalten bleiben, und Änderungen daran werden nicht automatisch in der Notiz gespeichert.
+Die portable EXE startet direkt; die Notizen bleiben neben der EXE. Beim Öffnen einer Anlage entsteht eine Kopie im Windows-Tempordner. Diese Kopie kann nach dem Schließen erhalten bleiben, und Änderungen daran werden nicht automatisch in der Notiz gespeichert.
 
 ## Bedienung
 
@@ -66,12 +66,12 @@ Die Anwendung speichert automatisch. Das aktuelle Speicherformat liest Dateien �
 
 ## Projekt in CLion
 
-Den Projektordner in CLion öffnen, eine Windows-C++-Toolchain (MinGW oder MSVC) auswählen, CMake laden und das Ziel `StickyNotes` bauen. CMake 3.20 oder neuer ist erforderlich. Das Ziel `StickyNotesApp` ist die interne Anwendung; für die portable Weitergabe wird ausschließlich die vom Ziel `StickyNotes` gebaute EXE benötigt.
+Den Projektordner in CLion öffnen, eine Windows-C++-Toolchain (MinGW oder MSVC) auswählen, CMake laden und das Ziel `StickyNotes` bauen. CMake 3.20 oder neuer ist erforderlich. Für die portable Weitergabe wird die vom Ziel `StickyNotes` gebaute EXE benötigt.
 
 
 ## Tests
 
-Mit aktivierter CMake-Option `BUILD_TESTING` die Ziele `StickyNotesReliability`, `StickyNotesLauncherPaths` und `StickyNotesAttachments` bauen und anschließend `ctest --test-dir build-release --output-on-failure` ausführen. Die Tests verwenden eigene temporäre Testdaten.
+Mit aktivierter CMake-Option `BUILD_TESTING` die Ziele `StickyNotesReliability` und `StickyNotesAttachments` bauen und anschließend `ctest --test-dir build-release --output-on-failure` ausführen. Die Tests verwenden eigene temporäre Testdaten.
 
 ## Lizenz
 
