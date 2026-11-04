@@ -14,7 +14,7 @@ vergrößern oder platzsparend zusammenklappen kannst.
 
 </details>
 
-**[StickyNotes 1.0 herunterladen](https://github.com/cybeerboy/StickyNotes/releases/latest)** · Windows 64 Bit · portabel
+**[StickyNotes herunterladen](https://github.com/cybeerboy/StickyNotes/releases/latest)** · Windows 64 Bit · portabel
 
 Schreib dir Ideen auf, formatiere wichtige Stellen und behalte Bilder oder
 PDFs direkt bei deinen Notizen. Deine Daten bleiben bei dir: Sie liegen in

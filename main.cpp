@@ -484,7 +484,7 @@ LRESULT CALLBACK aboutDialogProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
         };
         state->titleFont=CreateFontW(-22,0,0,0,FW_SEMIBOLD,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,CLEARTYPE_QUALITY,DEFAULT_PITCH,L"Segoe UI");
         HWND title=add(L"STATIC",L"StickyNotes",0,92,29,265,30,0); if(state->titleFont) SendMessageW(title,WM_SETFONT,reinterpret_cast<WPARAM>(state->titleFont),TRUE);
-        add(L"STATIC",L"Version 1.0 · Haftnotizen für Windows",0,92,59,265,23,601);
+        add(L"STATIC",L"Version 1.0.1 · Haftnotizen für Windows",0,92,59,265,23,601);
         add(L"STATIC",L"Gedanken festhalten.\nEinfach, persönlich und portabel.",0,28,113,330,48,602);
         add(L"STATIC",L"© CyBeerBoy",0,28,177,330,24,603);
         add(L"BUTTON",L"GitHub-Profil öffnen  ↗",WS_TABSTOP|BS_OWNERDRAW,28,215,330,39,502);
@@ -774,7 +774,7 @@ int WINAPI wWinMain(HINSTANCE h, HINSTANCE, PWSTR, int) {
         }
     }
     font = CreateFontW(-16,0,0,0,FW_NORMAL,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,CLEARTYPE_QUALITY,DEFAULT_PITCH|FF_DONTCARE,L"Segoe UI");
-    WNDCLASSW wc{}; wc.style=CS_DBLCLKS; wc.lpfnWndProc=procedure; wc.hInstance=instance; wc.lpszClassName=L"StickyNotesWindow"; wc.hCursor=LoadCursorW(nullptr, IDC_ARROW);
+    WNDCLASSW wc{}; wc.style=CS_DBLCLKS; wc.lpfnWndProc=procedure; wc.hInstance=instance; wc.lpszClassName=L"StickyNotesWindow"; wc.hCursor=LoadCursorW(nullptr, IDC_ARROW); wc.hIcon=LoadIconW(instance,MAKEINTRESOURCEW(1));
     if (!RegisterClassW(&wc)) return 1;
     if (!load()) {
         warn(L"Die gespeicherten Notizen konnten nicht gelesen werden. Die Datei wird nicht überschrieben. Bitte sichere oder repariere notes.dat und starte die Anwendung neu.");

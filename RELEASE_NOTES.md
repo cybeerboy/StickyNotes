@@ -1,4 +1,11 @@
-# StickyNotes 1.0
+# StickyNotes 1.0.1
+
+StickyNotes hat jetzt ein eigenes Icon: ein kleiner gelber Notizzettel, der
+auch im Explorer und in der Taskleiste zu erkennen ist. Die portable EXE
+bleibt eine einzelne Datei und deine vorhandenen Notizen kannst du wie gewohnt
+weiterverwenden.
+
+## StickyNotes 1.0
 
 Die erste Version ist da! StickyNotes bringt deine Gedanken als kleine,
 verschiebbare Notizzettel direkt auf den Windows-Desktop.

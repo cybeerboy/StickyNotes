@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 3.20)
-project(StickyNotes VERSION 1.0.0 LANGUAGES CXX RC)
+project(StickyNotes VERSION 1.0.1 LANGUAGES CXX RC)
 if(NOT WIN32)
     message(FATAL_ERROR "StickyNotes benötigt Windows.")
 endif()
-add_executable(StickyNotesApp WIN32 main.cpp)
+set_source_files_properties(appicon.rc PROPERTIES OBJECT_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/assets/stickynotes.ico")
+add_executable(StickyNotesApp WIN32 main.cpp appicon.rc)
 set_target_properties(StickyNotesApp PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/intern")
 target_compile_features(StickyNotesApp PRIVATE cxx_std_17)
 target_compile_definitions(StickyNotesApp PRIVATE UNICODE _UNICODE WIN32_LEAN_AND_MEAN NOMINMAX)
@@ -33,7 +34,7 @@ add_custom_command(
     DEPENDS StickyNotesApp "${CMAKE_CURRENT_BINARY_DIR}/portable-template-$<CONFIG>.rc"
     VERBATIM
 )
-add_executable(StickyNotes WIN32 launcher.cpp version.rc "${CMAKE_CURRENT_BINARY_DIR}/portable-$<CONFIG>.rc")
+add_executable(StickyNotes WIN32 launcher.cpp version.rc appicon.rc "${CMAKE_CURRENT_BINARY_DIR}/portable-$<CONFIG>.rc")
 add_dependencies(StickyNotes StickyNotesApp)
 target_compile_features(StickyNotes PRIVATE cxx_std_17)
 target_compile_definitions(StickyNotes PRIVATE UNICODE _UNICODE WIN32_LEAN_AND_MEAN NOMINMAX)
