@@ -1,0 +1,10 @@
+/build/
+/build-*/
+/cmake-build-*/
+/.idea/
+*.dat
+*.dat.*
+*.exe
+*.dll
+*.obj
+*.pdb
