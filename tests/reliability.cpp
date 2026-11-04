@@ -28,6 +28,9 @@ std::wstring noteText(Note* n) {
 }
 }
 int main() {
+    if (parseTask(L"")!=TaskAction::None || parseTask(L"--task=new")!=TaskAction::NewNote ||
+        parseTask(L"--task=find")!=TaskAction::Find || parseTask(L"--task=arrange")!=TaskAction::Arrange ||
+        parseTask(L"--task=quit")!=TaskAction::Quit || parseTask(L"--task=unknown")!=TaskAction::Invalid) return 41;
     TemporaryFile testFile;
     if(!*testFile.path) return 1;
     instance=GetModuleHandleW(nullptr); if(!LoadLibraryW(L"Msftedit.dll")) return 2;

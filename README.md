@@ -52,6 +52,7 @@ Die portable EXE startet direkt; die Notizen bleiben neben der EXE. Beim Öffnen
 - An der Kopfleiste ziehen, um eine Notiz zu verschieben; die Fenstergröße lässt sich an den Rändern ändern.
 - Ein Doppelklick auf die Kopfleiste oder ein Klick auf den kleinen Pfeil klappt die Notiz zusammen und wieder auf. Im Streifen steht eine Textvorschau.
 - `+` erstellt eine neue Notiz. Über `⋯` erreichst du Suche, Textformat, Darstellung, Textdatei, Anlagen, Löschen und den Über-Dialog.
+- Ein Rechtsklick auf das StickyNotes-Symbol in der Windows-Taskleiste bietet Aktionen für neue Notizen, Suche, Anordnen und Beenden. Wenn du die portable EXE verschiebst, starte sie einmal am neuen Ort, damit Windows die Verknüpfungen aktualisieren kann.
 - Markierten Text kannst du fett (`Strg+B`), kursiv (`Strg+I`) oder unterstrichen (`Strg+U`) setzen. `Strg+Plus` und `Strg+Minus` ändern die Schriftgröße, `Strg+Umschalt+L` schaltet die Aufzählung um. `Strg+N` erstellt eine Notiz, `Strg+F` öffnet die Suche. Die Kürzel gelten, während eine Notiz aktiv ist. Segoe UI ist die Standardschrift.
 - Emojis können eingefügt und gespeichert werden, zum Beispiel über die Windows-Emoji-Auswahl `Windows-Taste + .`. Die Darstellung hängt von Windows und den verfügbaren Schriftarten ab; Emojis können einfarbig erscheinen.
 - Im Menü kannst du einzelne Notizen im Vordergrund halten oder halbtransparent anzeigen. `Als Standard verwenden` übernimmt Farbe, Fenstergröße und Optionen sowie das aktuelle Textformat für neue Notizen. `Notizen anordnen` platziert die Fenster auf dem primären Bildschirm.

@@ -1,4 +1,10 @@
-# StickyNotes 1.0.2
+# StickyNotes 1.0.3
+
+Ein Rechtsklick auf das StickyNotes-Symbol in der Windows-Taskleiste bietet
+jetzt schnelle Aktionen: eine neue Notiz erstellen, Notizen durchsuchen,
+anordnen oder StickyNotes beenden. Die App bleibt portabel.
+
+## StickyNotes 1.0.2
 
 Diese Version startet direkt als einzelne portable EXE. Der bisherige Starter,
 der das Programm in einen temporären Ordner entpackte, wurde entfernt.

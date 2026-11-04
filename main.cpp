@@ -12,6 +12,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include "jumplist.h"
 
 namespace {
 constexpr int ID_EDIT = 101, ID_NEW = 102, ID_COLOR = 103, ID_DELETE = 104, ID_QUIT = 105;
@@ -28,6 +29,13 @@ const ACCEL noteShortcuts[] = {
 };
 constexpr UINT_PTR SAVE_TIMER = 1;
 constexpr UINT UPDATE_SCROLLBAR = WM_APP + 1;
+#ifdef STICKYNOTES_ISOLATED_QA
+constexpr wchar_t noteClass[] = L"StickyNotesWindowQA";
+constexpr wchar_t mutexName[] = L"Local\\StickyNotesSingleInstanceQA";
+#else
+constexpr wchar_t noteClass[] = L"StickyNotesWindow";
+constexpr wchar_t mutexName[] = L"Local\\StickyNotesSingleInstance";
+#endif
 constexpr int HEADER = 24, BORDER = 4, COLLAPSED_HEIGHT = 26;
 constexpr size_t MAX_NOTE_TEXT = 1024 * 1024;
 const COLORREF colors[] = {RGB(255, 244, 153), RGB(180, 239, 184), RGB(161, 237, 247), RGB(255, 193, 211), RGB(221, 198, 250), RGB(235, 235, 230)};
@@ -484,7 +492,7 @@ LRESULT CALLBACK aboutDialogProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
         };
         state->titleFont=CreateFontW(-22,0,0,0,FW_SEMIBOLD,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,CLEARTYPE_QUALITY,DEFAULT_PITCH,L"Segoe UI");
         HWND title=add(L"STATIC",L"StickyNotes",0,92,29,265,30,0); if(state->titleFont) SendMessageW(title,WM_SETFONT,reinterpret_cast<WPARAM>(state->titleFont),TRUE);
-        add(L"STATIC",L"Version 1.0.2 · Haftnotizen für Windows",0,92,59,265,23,601);
+        add(L"STATIC",L"Version 1.0.3 · Haftnotizen für Windows",0,92,59,265,23,601);
         add(L"STATIC",L"Gedanken festhalten.\nEinfach, persönlich und portabel.",0,28,113,330,48,602);
         add(L"STATIC",L"© CyBeerBoy",0,28,177,330,24,603);
         add(L"BUTTON",L"GitHub-Profil öffnen  ↗",WS_TABSTOP|BS_OWNERDRAW,28,215,330,39,502);
@@ -544,6 +552,25 @@ LRESULT CALLBACK procedure(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
     if (msg == WM_NCCREATE) { n = static_cast<Note*>(reinterpret_cast<CREATESTRUCTW*>(lp)->lpCreateParams); n->window = hwnd; SetWindowLongPtrW(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(n)); }
     if (!n) return DefWindowProcW(hwnd, msg, wp, lp);
     switch (msg) {
+    case WM_COPYDATA: {
+        const auto* data=reinterpret_cast<const COPYDATASTRUCT*>(lp);
+        if (!data || !data->lpData || data->cbData<sizeof(wchar_t) || data->cbData>32768*sizeof(wchar_t) || data->cbData%sizeof(wchar_t)) return FALSE;
+        const auto* source=static_cast<const wchar_t*>(data->lpData); size_t count=data->cbData/sizeof(wchar_t);
+        if (source[count-1]!=L'\0' || wcsnlen(source,count)!=count-1) return FALSE;
+        wchar_t current[32768]{}; DWORD size=GetModuleFileNameW(nullptr,current,32768);
+        if (!size || size>=32768 || _wcsicmp(source,current)!=0) return FALSE;
+        int command=0;
+        switch (static_cast<TaskAction>(data->dwData)) {
+        case TaskAction::NewNote: command=ID_NEW; break;
+        case TaskAction::Find: command=ID_FIND; break;
+        case TaskAction::Arrange: command=ID_ARRANGE; break;
+        case TaskAction::Quit: command=ID_QUIT; break;
+        default: return FALSE;
+        }
+        if (loading || quitting) return FALSE;
+        if (command==ID_FIND) SetForegroundWindow(hwnd);
+        return PostMessageW(hwnd,WM_COMMAND,MAKEWPARAM(command,BN_CLICKED),0) ? TRUE : FALSE;
+    }
     case WM_NCCALCSIZE: return 0;
     case WM_CREATE: {
         n->edit = CreateWindowExW(0, MSFTEDIT_CLASS, L"", WS_CHILD|WS_VISIBLE|WS_TABSTOP|ES_MULTILINE|ES_AUTOVSCROLL|ES_WANTRETURN|WS_VSCROLL, 0,0,0,0, hwnd, reinterpret_cast<HMENU>(static_cast<INT_PTR>(ID_EDIT)), instance, nullptr);
@@ -714,7 +741,7 @@ void createNote(int x, int y, int width, int height, int color, const std::wstri
     if (x == CW_USEDEFAULT || y == CW_USEDEFAULT) { RECT work{}; SystemParametersInfoW(SPI_GETWORKAREA, 0, &work, 0); x=work.left+40; y=work.top+40; }
     RECT proposed{x,y,x+width,y+height};
     if (!MonitorFromRect(&proposed, MONITOR_DEFAULTTONULL)) { RECT work{}; SystemParametersInfoW(SPI_GETWORKAREA, 0, &work, 0); x=work.left+40; y=work.top+40; }
-    HWND hwnd = CreateWindowExW(WS_EX_APPWINDOW, L"StickyNotesWindow", L"StickyNotes", WS_POPUP, x,y,width,collapsed ? COLLAPSED_HEIGHT : height, nullptr,nullptr,instance,n.get());
+    HWND hwnd = CreateWindowExW(WS_EX_APPWINDOW, noteClass, L"StickyNotes", WS_POPUP, x,y,width,collapsed ? COLLAPSED_HEIGHT : height, nullptr,nullptr,instance,n.get());
     if (!hwnd) { warn(L"Das Notizfenster konnte nicht erstellt werden."); return; }
     HMODULE dwm=LoadLibraryW(L"dwmapi.dll");
     if (dwm) {
@@ -746,11 +773,28 @@ bool load() {
     return notes.size() == loaded.size();
 }
 }
-int WINAPI wWinMain(HINSTANCE h, HINSTANCE, PWSTR, int) {
-    HANDLE mutex = CreateMutexW(nullptr, TRUE, L"Local\\StickyNotesSingleInstance");
+int WINAPI wWinMain(HINSTANCE h, HINSTANCE, PWSTR arguments, int) {
+    TaskAction task=parseTask(arguments);
+    if (task==TaskAction::Invalid) { warn(L"Der Startparameter ist unbekannt."); return 1; }
+    HANDLE mutex = CreateMutexW(nullptr, TRUE, mutexName);
     if (!mutex) { warn(L"Die Anwendung konnte nicht gestartet werden."); return 1; }
-    if (GetLastError() == ERROR_ALREADY_EXISTS) { CloseHandle(mutex); warn(L"StickyNotes ist bereits geöffnet."); return 0; }
+    if (GetLastError() == ERROR_ALREADY_EXISTS) {
+        CloseHandle(mutex);
+        if (task==TaskAction::None) { warn(L"StickyNotes ist bereits geöffnet."); return 0; }
+        wchar_t path[32768]{}; DWORD len=GetModuleFileNameW(nullptr,path,32768);
+        bool sent=false;
+        if (len && len<32768) for(int i=0;i<20 && !sent;++i) {
+            HWND existing=FindWindowW(noteClass,nullptr);
+            if (existing) { COPYDATASTRUCT data{static_cast<ULONG_PTR>(task),static_cast<DWORD>((len+1)*sizeof(wchar_t)),path}; DWORD_PTR result=0;
+                sent=SendMessageTimeoutW(existing,WM_COPYDATA,0,reinterpret_cast<LPARAM>(&data),SMTO_ABORTIFHUNG|SMTO_BLOCK,1000,&result) && result; }
+            if(!sent) Sleep(100);
+        }
+        if(!sent) { warn(L"Die Aktion konnte nicht an die laufende StickyNotes-Version übergeben werden. Bitte prüfe, ob sie aus demselben Ordner gestartet wurde."); return 1; }
+        return 0;
+    }
+    if (task==TaskAction::Quit) { CloseHandle(mutex); return 0; }
     instance = h;
+    setupTaskbarTasks();
     if (!LoadLibraryW(L"Msftedit.dll")) { warn(L"Das Windows-Textsteuerelement konnte nicht geladen werden."); return 1; }
     SetProcessDPIAware();
     wchar_t folder[32768]{};
@@ -771,16 +815,20 @@ int WINAPI wWinMain(HINSTANCE h, HINSTANCE, PWSTR, int) {
         }
     }
     font = CreateFontW(-16,0,0,0,FW_NORMAL,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,CLEARTYPE_QUALITY,DEFAULT_PITCH|FF_DONTCARE,L"Segoe UI");
-    WNDCLASSW wc{}; wc.style=CS_DBLCLKS; wc.lpfnWndProc=procedure; wc.hInstance=instance; wc.lpszClassName=L"StickyNotesWindow"; wc.hCursor=LoadCursorW(nullptr, IDC_ARROW); wc.hIcon=LoadIconW(instance,MAKEINTRESOURCEW(1));
+    WNDCLASSW wc{}; wc.style=CS_DBLCLKS; wc.lpfnWndProc=procedure; wc.hInstance=instance; wc.lpszClassName=noteClass; wc.hCursor=LoadCursorW(nullptr, IDC_ARROW); wc.hIcon=LoadIconW(instance,MAKEINTRESOURCEW(1));
     if (!RegisterClassW(&wc)) return 1;
     if (!load()) {
         warn(L"Die gespeicherten Notizen konnten nicht gelesen werden. Die Datei wird nicht überschrieben. Bitte sichere oder repariere notes.dat und starte die Anwendung neu.");
         for(auto& n:notes) { DestroyWindow(n->window); if(n->brush) DeleteObject(n->brush); }
         notes.clear(); DeleteObject(font); CloseHandle(mutex); return 1;
     }
+    bool hadNotes=!notes.empty();
     if (notes.empty()) { createNote(CW_USEDEFAULT,CW_USEDEFAULT,defaultWidth,defaultHeight,defaultColor,L""); if(!notes.empty()) { notes.back()->topmost=defaultTop; notes.back()->transparent=defaultTransparent; applyAppearance(notes.back().get()); } }
     loading=false;
     if (notes.empty()) return 1;
+    if (task==TaskAction::NewNote && hadNotes) PostMessageW(notes.front()->window,WM_COMMAND,MAKEWPARAM(ID_NEW,BN_CLICKED),0);
+    if (task==TaskAction::Find) PostMessageW(notes.front()->window,WM_COMMAND,MAKEWPARAM(ID_FIND,BN_CLICKED),0);
+    if (task==TaskAction::Arrange) PostMessageW(notes.front()->window,WM_COMMAND,MAKEWPARAM(ID_ARRANGE,BN_CLICKED),0);
     HACCEL shortcuts=CreateAcceleratorTableW(const_cast<ACCEL*>(noteShortcuts),static_cast<int>(sizeof(noteShortcuts)/sizeof(noteShortcuts[0])));
     MSG msg{}; while (GetMessageW(&msg,nullptr,0,0)>0) {
         HWND root=GetAncestor(msg.hwnd,GA_ROOT);
